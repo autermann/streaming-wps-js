@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+	<script type='text/javascript' src="javascript/streaming.js"></script>
+	<script type="text/javascript">
+		(function(){
+			var options = {
+				streamingWPS: "http://localhost:12121/WebProcessingService",
+				streamingId: "com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm",
+				remoteWPS: "http://localhost:12121/WebProcessingService",
+				remoteId: "com.github.autermann.wps.streaming.TestAlgorithm"
+			};
+
+			Streaming.Client.start(options, function(processInfo) {
+				console.log("Started process: ", processInfo);
+
+				var client = new Streaming.Client(processInfo)
+					.on("open", function() {
+						console.log("Client opened");
+					})
+					.on("close", function() {
+					 	console.log("Client closed");
+					})
+					.on("error", function(cause) {
+						console.log("Client failed", cause);
+					})
+					.on("outputmessage", function(message) {
+						console.log("Received Output", message);
+					})
+					.on("errormessage", function(message) {
+						console.log("Received Error", message);
+					})
+					.on("stopmessage", function(message) {
+						console.log("Received Stop message", message);
+					})
+					.listen();
+
+				var options = {
+					processId: processInfo.processId,
+					relatedMessages: [],
+					inputs: [
+						new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:int", 1)),
+						new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", 1))
+					]
+				};
+				client.send(new Streaming.Message.Input(options));
+			});
+		})();
+	</script>
+</head>
+<body>
+</body>
+
+</html>
