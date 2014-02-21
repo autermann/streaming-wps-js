@@ -205,16 +205,20 @@
 	})();
 
 	window.xml2string = (function(){
+		var fun;
 		if (typeof window.XMLSerializer !== "undefined") {
-			return function(xml) {
+			fun = function(xml) {
 				return new XMLSerializer().serializeToString(xml);
 			}
 		} else if (typeof window.ActiveXObject !== "undefined") {
-			return function(xml) {
+			fun = function(xml) {
 				return xml.xml;
 			};
 		} else {
 			throw new Error("No XML serializer found");
+		}
+		return function(xml) {
+			vkbeautify.xml(fun(xml));
 		}
 	})();
 })();
@@ -1211,7 +1215,7 @@ Streaming.Client.start = function(options, callback) {
 		outputs: new Streaming.WPS.ResponseDocument({definitons: outputs})
 	});
 
-	var	requestString = vkbeautify.xml(xml2string(request.toXML()));
+	var	requestString = xml2string(request.toXML());
 	console.debug("Request:", requestString)
 	var self = this;
 	$.ajax(options.streamingWPS, {
