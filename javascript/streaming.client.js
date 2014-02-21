@@ -68,7 +68,7 @@
 				var xml = Streaming.Util.string2xml(e.data);
 				var parser = new Streaming.XML.Parser();
 				var message = parser.parse(xml);
-				console.debug("Received Message", message);
+				console.debug("Received Message", xml);
 				if (message instanceof Streaming.Message.Input) {
 					self.fire("inputmessage", message);
 				} else if (message instanceof Streaming.Message.Output) {
@@ -113,7 +113,7 @@
 		_send: function(message) {
 			var xml = message.toXML(),
 				string = Streaming.Util.xml2string(xml);
-			console.debug("Sending message", xml);
+			console.debug("Sending Message", xml);
 			this.socket.send(string);
 		},
 		close: function() {
@@ -147,18 +147,17 @@
 			processId: options.streamingId, inputs: inputs,
 			outputs: new Streaming.WPS.ResponseDocument({definitons: outputs})
 		});
-
-		var	requestString = Streaming.Util.xml2string(request.toXML());
-		console.debug("Request:", requestString)
+		var requestxml = request.toXML();
+		console.debug("WPS Request:", requestxml);
 		var self = this;
 		$.ajax(options.streamingWPS, {
 			type: "POST",
 			contentType:"application/xml",
 			dataType: "xml",
 			mimeType: "application/xml",
-			data: requestString
+			data: Streaming.Util.xml2string(requestxml)
 		}).done(function(e) {
-			console.debug("Response:", e)
+			console.debug("WPS Response:", e);
 			var parser = new Streaming.XML.Parser();
 			var response = parser.parse(e);
 			processInfo = {

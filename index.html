@@ -28,26 +28,26 @@
 			};
 
 			Streaming.Client.start(options, function(processInfo) {
-				console.log("Started process: ", processInfo);
+				console.debug("Started process: ", processInfo);
 
 				var client = new Streaming.Client(processInfo)
 					.on("open", function() {
-						console.log("Client opened");
+						console.debug("Client opened");
 					})
 					.on("close", function() {
-					 	console.log("Client closed");
+					 	console.debug("Client closed");
 					})
 					.on("error", function(cause) {
-						console.log("Client failed", cause);
+						console.debug("Client failed", cause);
 					})
 					.on("outputmessage", function(message) {
-						console.log("Received Output", message);
+						console.debug("Received Output", message);
 					})
 					.on("errormessage", function(message) {
-						console.log("Received Error", message);
+						console.debug("Received Error", message);
 					})
 					.on("stopmessage", function(message) {
-						console.log("Received Stop message", message);
+						console.debug("Received Stop message", message);
 					})
 					.listen();
 
@@ -60,6 +60,10 @@
 					]
 				};
 
+				client.send(new Streaming.Message.Input(options));
+				client.send(new Streaming.Message.Input(options));
+				client.send(new Streaming.Message.Input(options));
+				client.send(new Streaming.Message.Input(options));
 				client.send(new Streaming.Message.Input(options));
 			});
 		})();
