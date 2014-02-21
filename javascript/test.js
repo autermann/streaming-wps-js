@@ -1,10 +1,25 @@
+/*
+ * Copyright 2014 Christian Autermann
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 var message = new Streaming.Message.Input({
-	processId: "uuid:" + uuid(),
+	processId: "uuid:" + Streaming.Util.uuid(),
 	relatedMessages: [
-		"uuid:" + uuid(),
+		"uuid:" + Streaming.Util.uuid(),
 		{
 			type: "myRelationShipType",
-			value: "uuid:" + uuid()
+			value: "uuid:" + Streaming.Util.uuid()
 		}
 	],
 	inputs: [
@@ -52,17 +67,17 @@ var executeRequest2 = new Streaming.WPS.ExecuteRequest({
 });
 
 
-var messageString = vkbeautify.xml(xml2string(message.toXML()))
-var executeRequestString1 = vkbeautify.xml(xml2string(message.toXML()))
-var executeRequestString2 = vkbeautify.xml(xml2string(message.toXML()))
+var messageString = vkbeautify.xml(Streaming.Util.xml2string(message.toXML()))
+var executeRequestString1 = vkbeautify.xml(Streaming.Util.xml2string(message.toXML()))
+var executeRequestString2 = vkbeautify.xml(Streaming.Util.xml2string(message.toXML()))
 console.log(messageString);
 console.log(executeRequestString1);
 console.log(executeRequestString2);
 
 var executeResponseString = "<wps:ExecuteResponse xmlns:wps=\"http://www.opengis.net/wps/1.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:ows=\"http://www.opengis.net/ows/1.1\" xsi:schemaLocation=\"http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsExecute_response.xsd\" serviceInstance=\"http://localhost:12121/WebProcessingService?REQUEST=GetCapabilities&amp;SERVICE=WPS\" xml:lang=\"en-US\" service=\"WPS\" version=\"1.0.0\"><wps:Process wps:processVersion=\"1.0.0\"><ows:Identifier>com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm</ows:Identifier><ows:Title>Delegating Streaming Algorithm</ows:Title></wps:Process><wps:Status creationTime=\"2014-02-20T14:51:12.380+01:00\"><wps:ProcessSucceeded>Process successful</wps:ProcessSucceeded></wps:Status><wps:ProcessOutputs><wps:Output><ows:Identifier>process-id</ows:Identifier><ows:Title>The Process ID</ows:Title><wps:Data><wps:LiteralData dataType=\"xs:anyURI\">uuid:12b0f626-6328-488d-8c69-a567bcaa863a</wps:LiteralData></wps:Data></wps:Output><wps:Output><ows:Identifier>input-socket-uri</ows:Identifier><ows:Title>The Input WebSocket URI</ows:Title><wps:Data><wps:LiteralData dataType=\"xs:anyURI\">ws://localhost:12121/streaming</wps:LiteralData></wps:Data></wps:Output><wps:Output><ows:Identifier>output-socket-uri</ows:Identifier><ows:Title>The Output WebSocket URI</ows:Title><wps:Data><wps:LiteralData dataType=\"xs:anyURI\">ws://localhost:12121/streaming</wps:LiteralData></wps:Data></wps:Output></wps:ProcessOutputs></wps:ExecuteResponse>";
-var xml = string2xml(executeResponseString)
+var xml = Streaming.Util.string2xml(executeResponseString)
 
-console.log(vkbeautify.xml(xml2string(xml)));
+console.log(vkbeautify.xml(Streaming.Util.xml2string(xml)));
 
 var parser = new Streaming.XML.Parser();
 console.log(parser.parse(xml));
