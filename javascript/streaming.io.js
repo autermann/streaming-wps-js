@@ -44,7 +44,7 @@
 	Streaming.XML.NS_WPS    = "http://www.opengis.net/wps/1.0.0";
 	Streaming.XML.NS_XLINK  = "http://www.w3.org/1999/xlink";
 	Streaming.XML.NS_OWS    = "http://www.opengis.net/ows/1.1";
-
+	Document.XPATH_NAMESPACES = Document.XPATH_NAMESPACES || {};
 	Document.XPATH_NAMESPACES["soap"]   = Streaming.XML.NS_SOAP,
 	Document.XPATH_NAMESPACES["wsa"]    = Streaming.XML.NS_WSA,
 	Document.XPATH_NAMESPACES["stream"] = Streaming.XML.NS_STREAM,

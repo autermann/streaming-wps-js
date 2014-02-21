@@ -56,11 +56,12 @@
 			return vkbeautify.xml(fun(xml));
 		}
 	})();
+	Document.XPATH_NAMESPACES = Document.XPATH_NAMESPACES || {};
 	var nameresolver = function(prefix) {
 		return Document.XPATH_NAMESPACES[prefix];
 	};
 	Document.prototype._xpath = function(node, path, type) {
-		if (!node) { node = this };
+		if (!node) { node = this.documentElement };
 		return this.evaluate(path, node, nameresolver, type, null);
 	};
 	Document.prototype.findAny = function(path, node) {
