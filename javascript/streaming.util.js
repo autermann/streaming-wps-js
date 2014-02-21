@@ -53,7 +53,7 @@
 			throw new Error("No XML serializer found");
 		}
 		return function(xml) {
-			vkbeautify.xml(fun(xml));
+			return vkbeautify.xml(fun(xml));
 		}
 	})();
 })(window.Streaming||(window.Streaming = {}));

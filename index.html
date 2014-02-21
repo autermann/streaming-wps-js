@@ -10,13 +10,13 @@
 	<script type='text/javascript' src="javascript/class.js"></script>
 	<script type='text/javascript' src="javascript/class.events.js"></script>
 
-	<script type='text/javascript' src="javascript/streaming.client.js"></script>
 	<script type='text/javascript' src="javascript/streaming.data.js"></script>
 	<script type='text/javascript' src="javascript/streaming.io.js"></script>
 	<script type='text/javascript' src="javascript/streaming.js"></script>
 	<script type='text/javascript' src="javascript/streaming.message.js"></script>
 	<script type='text/javascript' src="javascript/streaming.util.js"></script>
 	<script type='text/javascript' src="javascript/streaming.wps.js"></script>
+	<script type='text/javascript' src="javascript/streaming.client.js"></script>
 
 	<script type="text/javascript">
 		(function(){
@@ -59,6 +59,7 @@
 						new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", 1))
 					]
 				};
+
 				client.send(new Streaming.Message.Input(options));
 			});
 		})();
