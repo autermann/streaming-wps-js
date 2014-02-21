@@ -33,25 +33,25 @@
 			} else {
 				return false;
 			}
-		},
-		findIn: function(e) {
-			return e.getElementsByTagNameNS(this.getNamespace(), this.getName());
-		},
-		findOneIn: function(e) {
-			return this.findIn(e)[0];
 		}
-
 	});
 	Streaming.XML = Streaming.XML || {};
 
-	Streaming.XML.NS_SOAP = "http://www.w3.org/2003/05/soap-envelope";
-	Streaming.XML.NS_WSA = "http://www.w3.org/2005/08/addressing";
+	Streaming.XML.NS_SOAP   = "http://www.w3.org/2003/05/soap-envelope";
+	Streaming.XML.NS_WSA    = "http://www.w3.org/2005/08/addressing";
 	Streaming.XML.NS_STREAM = "https://github.com/autermann/streaming-wps";
-	Streaming.XML.NS_XSI = "http://www.w3.org/2001/XMLSchema-instance";
-	Streaming.XML.NS_WPS = "http://www.opengis.net/wps/1.0.0";
-	Streaming.XML.NS_XLINK = "http://www.w3.org/1999/xlink";
-	Streaming.XML.NS_OWS = "http://www.opengis.net/ows/1.1";
+	Streaming.XML.NS_XSI    = "http://www.w3.org/2001/XMLSchema-instance";
+	Streaming.XML.NS_WPS    = "http://www.opengis.net/wps/1.0.0";
+	Streaming.XML.NS_XLINK  = "http://www.w3.org/1999/xlink";
+	Streaming.XML.NS_OWS    = "http://www.opengis.net/ows/1.1";
 
+	Document.XPATH_NAMESPACES["soap"]   = Streaming.XML.NS_SOAP,
+	Document.XPATH_NAMESPACES["wsa"]    = Streaming.XML.NS_WSA,
+	Document.XPATH_NAMESPACES["stream"] = Streaming.XML.NS_STREAM,
+	Document.XPATH_NAMESPACES["xsi"]    = Streaming.XML.NS_XSI,
+	Document.XPATH_NAMESPACES["wps"]    = Streaming.XML.NS_WPS,
+	Document.XPATH_NAMESPACES["xlink"]  = Streaming.XML.NS_XLINK,
+	Document.XPATH_NAMESPACES["ows"]    = Streaming.XML.NS_OWS
 
 	QNames = {
 		OWS: {

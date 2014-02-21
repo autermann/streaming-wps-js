@@ -56,4 +56,59 @@
 			return vkbeautify.xml(fun(xml));
 		}
 	})();
+	var nameresolver = function(prefix) {
+		return Document.XPATH_NAMESPACES[prefix];
+	};
+	Document.prototype._xpath = function(node, path, type) {
+		if (!node) { node = this };
+		return this.evaluate(path, node, nameresolver, type, null);
+	};
+	Document.prototype.findAny = function(path, node) {
+		var node, nodes = [], iter;
+		iter = this._xpath(node, path, XPathResult.ANY_TYPE);
+		while(node = iter.iterateNext()) {
+			nodes.push(node);
+		}
+		return nodes;
+	};
+	Document.prototype.findNumber = function(path, node) {
+		var result = this._xpath(node, path, XPathResult.NUMBER_TYPE);
+		return result.numberValue;
+	};
+	Document.prototype.findString = function(path, node) {
+		var result = this._xpath(node, path, XPathResult.STRING_TYPE);
+		return result.stringValue;
+	};
+	Document.prototype.findBoolean = function(path, node) {
+		var result = this._xpath(node, path, XPathResult.BOOLEAN_TYPE);
+		return result.booleanValue;
+	};
+	Document.prototype.findNodes = function(path, node) {
+		var node, nodes = [], iter;
+		iter = this._xpath(node, path, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+		while(node = iter.iterateNext()) { nodes.push(node); }
+		return nodes;
+	},
+	Document.prototype.findNode = function(path, node) {
+		var result = this._xpath(node, path, XPathResult.FIRST_ORDERED_NODE_TYPE);
+		return result.singleNodeValue;
+	};
+	Element.prototype.findAny = function(path) {
+		return this.ownerDocument.findAny(this, path);
+	};
+	Element.prototype.findNumber = function(node, path) {
+		return this.ownerDocument.findNumber(this, path);
+	};
+	Element.prototype.findString = function(node, path) {
+		return this.ownerDocument.findString(this, path);
+	};
+	Element.prototype.findBoolean = function(node, path) {
+		return this.ownerDocument.findBoolea(this, path);
+	};
+	Element.prototype.findNodes = function(node, path) {
+		return this.ownerDocument.findNodes(this, path);
+	};
+	Element.prototype.findNode = function(node, path) {
+		return this.ownerDocument.findNode(this, path);
+	};
 })(window.Streaming||(window.Streaming = {}));
