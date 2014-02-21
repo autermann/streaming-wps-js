@@ -82,9 +82,10 @@
 		init: function(options) {
 			options.action = "https://github.com/autermann/streaming-wps/output";
 			this._super(options);
+			this.outputs = options.outputs;
 		},
-		fromXML: function() {
-
+		getOutputs: function() {
+			return this.outputs;
 		}
 	});
 

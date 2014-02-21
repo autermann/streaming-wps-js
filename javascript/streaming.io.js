@@ -492,26 +492,77 @@
 				processId: this.parseProcessId()
 			});
 		},
-		parseOutputMessage: function() {
-			//TODO
+		parseOutputMessage: function(options) {
+			var i, id,
+				elements = this.xml.querySelectorAll("Envelope>Body>OutputMessage>Outputs>Output");
+			options.outputs = {}
+			for (i = 0; i < elements.length; ++i) {
+				id = this.parseIdentifier(elements[i].querySelector(":scope>Identifier"));
+				options.outputs[id] = this.parseOutput(elements[i]);
+			}
+			return new Streaming.Message.Output(options);
 		},
-		parseStopMessage: function() {
-			//TODO
+		parseStopMessage: function(options) {
+			return new Streaming.Message.Stop(options);
 		},
-		parseErrorMessage: function() {
+		parseErrorMessage: function(options) {
+			//TODO parse
 			throw this.xml;
 		},
 		parseExceptionReport: function() {
+			//TODO parse
 			throw this.xml;
+		},
+		parseRelatedMessages: function() {
+			var relatesTo = this.xml.querySelectorAll("Envelope>Header>RelatesTo");
+			var relatedMessages = [];
+			for (var i = 0; i < relatesTo.length; ++i) {
+				if (relatesTo[i].getAttribute("RelationshipType")) {
+					relatedMessages.push({
+						type: relatesTo[i].getAttribute("RelationshipType"),
+						value: relatesTo[i].textContent
+					});
+				} else {
+					relatedMessages.push(relatesTo[i].textContent);
+				}
+			}
+			return relatedMessages;
+		},
+		parseMessageID: function() {
+			return this.xml.querySelector("Envelope>Header>MessageID").textContent;
+		},
+		parseProcessID: function() {
+			return this.xml.querySelector("Envelope>Body>*>ProcessID").textContent;
+		},
+		parseMessage: function() {
+			var options = {
+				processId: this.parseProcessID(),
+				messageId: this.parseMessageID(),
+				relatedMessage: this.parseRelatedMessages()
+			};
+			var root = this.xml.querySelector("Envelope>Body>*");
+			if (QNames.Stream.OutputMessage.is(root)) {
+				return this.parseOutputMessage(options);
+			} else if (QNames.Stream.ErrorMessage.is(root)) {
+				return this.parseErrorMessage(options);
+			} else if (QNames.Stream.StopMessage.is(root)) {
+				return this.parseStopMessage(options);
+			} else {
+				throw new Error("Can not parse XML");
+			}
 		},
 		parse: function(xml) {
 			this.xml = xml; var root = xml.documentElement;
-			     if (QNames.WPS.ExecuteResponse.is(root))  return this.parseExecuteResponse();
-			else if (QNames.Stream.OutputMessage.is(root)) return this.parseOutputMessage();
-			else if (QNames.Stream.ErrorMessage.is(root))  return this.parseErrorMessage();
-			else if (QNames.Stream.StopMessage.is(root))   return this.parseStopMessage();
-			else if (QNames.OWS.ExceptionReport.is(root))  return this.parseExceptionReport();
-			else throw new Error("Can not parse XML");
+			if (QNames.WPS.ExecuteResponse.is(root)) {
+				return this.parseExecuteResponse();
+			} else if (QNames.OWS.ExceptionReport.is(root)) {
+				return this.parseExceptionReport();
+			} else if (QNames.SOAP.Envelope.is(root)) {
+				return this.parseMessage();
+			} else {
+				throw new Error("Can not parse XML");
+			}
+
 		}
 	});
 })(window.Streaming||(window.Streaming = {}));
