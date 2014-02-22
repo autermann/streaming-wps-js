@@ -56,40 +56,54 @@
 			this.processId = options.processId;
 			this.socket = null;
 			this.state = null;
+			this.messages= {};
 		},
 		connect: function() {
 			if (this.socket) return;
 			var self = this;
 			this.socket = new WebSocket(this.uri);
-			this.socket.onopen = function() { self.state = "open"; self.fire("open"); };
-			this.socket.onclose = function() { self.state = "closed"; self.fire("close"); };
-			this.socket.onerror = function(e) { self.fire("error", e); };
+			this.socket.onopen = function() {
+				self.state = "open";
+				self.fire("open");
+			};
+			this.socket.onclose = function() {
+				self.state = "closed";
+				self.fire("close");
+			};
+			this.socket.onerror = function(e) {
+				self.fire("error", e);
+			};
 			this.socket.onmessage = function(e) {
 				var xml = Streaming.Util.string2xml(e.data);
+				console.debug("Received Message", xml);
 				var parser = new Streaming.XML.Parser();
 				var message = parser.parse(xml);
-				console.debug("Received Message", xml);
-				if (message instanceof Streaming.Message.Input) {
-					self.fire("inputmessage", message);
-				} else if (message instanceof Streaming.Message.Output) {
-					self.fire("outputmessage", message);
-				} else if (message instanceof Streaming.Message.Error) {
-					self.fire("errormessage", message);
-				} else if (message instanceof Streaming.Message.OutputRequest) {
-					self.fire("outputrequestmessage", message);
-				} else if (message instanceof Streaming.Message.Stop) {
-					self.fire("stopmessage", message);
+				if (message instanceof Streaming.Message) {
+					self.messages[message.getID()] = message;
+					if (message instanceof Streaming.Message.Input) {
+						self.fire("inputmessage", message);
+					} else if (message instanceof Streaming.Message.Output) {
+						self.fire("outputmessage", message);
+					} else if (message instanceof Streaming.Message.Error) {
+						self.fire("errormessage", message);
+					} else if (message instanceof Streaming.Message.OutputRequest) {
+						self.fire("outputrequestmessage", message);
+					} else if (message instanceof Streaming.Message.Stop) {
+						self.fire("stopmessage", message);
+					} else {
+						self.fire("error", message);
+					}
 				} else {
-					self.fire("error", message);
+					self.fire("error", "Can not decode message!");
 				}
 			};
 			return this;
 		},
 		listen: function() {
-			this._doOnOpen(function() {
-				this._send(new Streaming.Message.OutputRequest({processId: this.processId}));
-			});
-			return this;
+			return this.send(new Streaming.Message.OutputRequest());
+		},
+		stop: function() {
+			return this.send(new Streaming.Message.Stop());
 		},
 		_doOnOpen: function(fun) {
 			var self = this;
@@ -98,27 +112,25 @@
 			} else if (self.state === "closed") {
 				throw new Error("Client already closed!");
 			} else {
-				self.connect();
 				self.on("open", function() {
 					fun.call(self);
 				});
+				self.connect();
 			}
 		},
 		send: function(message) {
 			this._doOnOpen(function() {
-				this._send(message);
+				message.setProcessID(this.processId);
+				this.messages[message.getID()] = message;
+				var xml = message.toXML();
+				console.debug("Sending Message", xml);
+				this.socket.send(Streaming.Util.xml2string(xml));
 			})
 			return this;
 		},
-		_send: function(message) {
-			var xml = message.toXML(),
-				string = Streaming.Util.xml2string(xml);
-			console.debug("Sending Message", xml);
-			this.socket.send(string);
-		},
 		close: function() {
 			if (this.socket) {
-				this.sockert.close();
+				this.socket.close();
 			}
 		}
 	});
