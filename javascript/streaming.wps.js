@@ -29,6 +29,27 @@
 		}
 	});
 
+	Streaming.WPS.Exception = Class.extend({
+		init: function(code, locator, messages) {
+			this.code = code;
+			this.locator = locator;
+			this.messages = messages || [];
+		},
+		getCode: function() {
+			return this.code;
+		},
+		getLocator: function() {
+			return this.locator;
+		},
+		getMessages: function() {
+			return this.messages;
+		}
+	});
+
+	Streaming.WPS.ExceptionReport = Class.extend({
+
+	});
+
 	Streaming.WPS.ExecuteRequest = Class.extend({
 		init: function(options) {
 			if (!(options.processId instanceof Streaming.OwsCodeType)) {
