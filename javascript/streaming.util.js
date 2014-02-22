@@ -60,56 +60,56 @@
 	var nameresolver = function(prefix) {
 		return Document.XPATH_NAMESPACES[prefix];
 	};
-	Document.prototype._xpath = function(node, path, type) {
-		if (!node) { node = this.documentElement };
+	Document.prototype._xpath = function(path, node, type) {
+		if (!node) { node = this.documentElement; }
 		return this.evaluate(path, node, nameresolver, type, null);
 	};
 	Document.prototype.findAny = function(path, node) {
 		var node, nodes = [], iter;
-		iter = this._xpath(node, path, XPathResult.ANY_TYPE);
+		iter = this._xpath(path, node, XPathResult.ANY_TYPE);
 		while(node = iter.iterateNext()) {
 			nodes.push(node);
 		}
 		return nodes;
 	};
 	Document.prototype.findNumber = function(path, node) {
-		var result = this._xpath(node, path, XPathResult.NUMBER_TYPE);
+		var result = this._xpath(path, node, XPathResult.NUMBER_TYPE);
 		return result.numberValue;
 	};
 	Document.prototype.findString = function(path, node) {
-		var result = this._xpath(node, path, XPathResult.STRING_TYPE);
+		var result = this._xpath(path, node, XPathResult.STRING_TYPE);
 		return result.stringValue;
 	};
 	Document.prototype.findBoolean = function(path, node) {
-		var result = this._xpath(node, path, XPathResult.BOOLEAN_TYPE);
+		var result = this._xpath(path, node, XPathResult.BOOLEAN_TYPE);
 		return result.booleanValue;
 	};
 	Document.prototype.findNodes = function(path, node) {
 		var node, nodes = [], iter;
-		iter = this._xpath(node, path, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
+		iter = this._xpath(path, node, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
 		while(node = iter.iterateNext()) { nodes.push(node); }
 		return nodes;
 	},
 	Document.prototype.findNode = function(path, node) {
-		var result = this._xpath(node, path, XPathResult.FIRST_ORDERED_NODE_TYPE);
+		var result = this._xpath(path, node, XPathResult.FIRST_ORDERED_NODE_TYPE);
 		return result.singleNodeValue;
 	};
 	Element.prototype.findAny = function(path) {
-		return this.ownerDocument.findAny(this, path);
+		return this.ownerDocument.findAny(path, this);
 	};
-	Element.prototype.findNumber = function(node, path) {
-		return this.ownerDocument.findNumber(this, path);
+	Element.prototype.findNumber = function(path) {
+		return this.ownerDocument.findNumber(path, this);
 	};
-	Element.prototype.findString = function(node, path) {
-		return this.ownerDocument.findString(this, path);
+	Element.prototype.findString = function(path) {
+		return this.ownerDocument.findString(path, this);
 	};
-	Element.prototype.findBoolean = function(node, path) {
-		return this.ownerDocument.findBoolea(this, path);
+	Element.prototype.findBoolean = function(path) {
+		return this.ownerDocument.findBoolea(path, this);
 	};
-	Element.prototype.findNodes = function(node, path) {
-		return this.ownerDocument.findNodes(this, path);
+	Element.prototype.findNodes = function(path) {
+		return this.ownerDocument.findNodes(path, this);
 	};
-	Element.prototype.findNode = function(node, path) {
-		return this.ownerDocument.findNode(this, path);
+	Element.prototype.findNode = function(path) {
+		return this.ownerDocument.findNode(path, this);
 	};
 })(window.Streaming||(window.Streaming = {}));
