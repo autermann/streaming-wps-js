@@ -17,9 +17,11 @@
 				return function() {
 					var tmp = this._super;
 					this._super = _super[name];
-					var ret = fn.apply(this, arguments);
-					this._super = tmp;
-					return ret;
+					try {
+						return fn.apply(this, arguments);
+					} finally {
+						this._super = tmp;
+					}
 				};
 			})(name, prop[name]) : prop[name];
 		}
