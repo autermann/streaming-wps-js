@@ -28,9 +28,15 @@
 			};
 
 			Streaming.Client.start(options, function(processInfo) {
+				var client, count = 0, expected = 10;
 				console.debug("Started process: ", processInfo);
-
-				var client = new Streaming.Client(processInfo)
+				function onMessage(message) {
+					if ((++count) >= expected) {
+						client.stop();
+						client.close();
+					}
+				}
+				client = new Streaming.Client(processInfo)
 					.on("open", function() {
 						console.debug("Client opened");
 					})
@@ -41,30 +47,37 @@
 						console.debug("Client failed", cause);
 					})
 					.on("outputmessage", function(message) {
-						console.debug("Received Output", message);
+						console.debug("Received Output");
+						onMessage(message);
 					})
 					.on("errormessage", function(message) {
 						console.debug("Received Error", message);
+						onMessage(message);
 					})
 					.on("stopmessage", function(message) {
 						console.debug("Received Stop message", message);
+						onMessage(message);
 					})
 					.listen();
 
-				var options = {
-					processId: processInfo.processId,
-					relatedMessages: [],
-					inputs: [
-						new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:int", 1)),
-						new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", 1))
-					]
-				};
+				function createInputMessage(a, b, dependencies) {
+					dependencies = dependencies || [];
+					return new Streaming.Message.Input({
+						relatedMessages: dependencies,
+						inputs: [
+							new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:int", a)),
+							new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", b))
+						]
+					});
+				}
 
-				client.send(new Streaming.Message.Input(options));
-				client.send(new Streaming.Message.Input(options));
-				client.send(new Streaming.Message.Input(options));
-				client.send(new Streaming.Message.Input(options));
-				client.send(new Streaming.Message.Input(options));
+				var i, messages = [];
+				for (i = 0; i < expected; ++i) {
+					messages.push(createInputMessage(1, 1));
+				}
+				for (i = 0; i < messages.length; ++i) {
+					client.send(messages[i]);
+				}
 			});
 		})();
 	</script>
