@@ -390,29 +390,29 @@
 
 	Streaming.XML.Parser = Class.extend({
 		parseOutputs: function() {
-			var outputs = this.xml.querySelectorAll("ExecuteResponse>ProcessOutputs>Output")
+			var outputs = this.xml.findNodes("/wps:ExecuteResponse/wps:ProcessOutputs/wps:Output")
 			var i, parsed = {}, id, value;
 			for(i = 0; i < outputs.length; ++i) {
-				parsed[this.parseIdentifier(outputs[i].querySelector(":scope>Identifier"))]
-								= this.parseOutput(outputs[i]);
+				id = this.parseIdentifier(outputs[i].findNode("ows:Identifier"));
+				parsed[id] = this.parseOutput(outputs[i]);
 			}
 			return parsed;
 		},
 		parseOutput: function(output) {
-			if (output.querySelector(":scope>Data>LiteralData")) {
+			if (output.findNode("wps:Data/wps:LiteralData")) {
 				return this.parseLiteralData(output);
-			} else if (output.querySelector(":scope>Data>ComplexData")) {
+			} else if (output.findNode("wps:Data/wps:ComplexData")) {
 				return this.parseComplexData(output);
-			} else if (output.querySelector(":scope>Data>BoundingBoxData")) {
+			} else if (output.findNode("wps:Data/wps:BoundingBoxData")) {
 				return this.parseBoundingBoxData(output);
-			} else if (output.querySelector(":scope>Reference")) {
+			} else if (output.findNode("wps:Reference")) {
 				return this.parseReferenceData(output);
 			} else {
 				console.warn("Can not parse output", output);
 			}
 		},
 		parseLiteralData: function(output) {
-			var ldata = output.querySelector(":scope>Data>LiteralData");
+			var ldata = output.findNode("wps:Data/wps:LiteralData");
 			return new Streaming.Data.Literal(
 				ldata.getAttribute("dataType"),
 				ldata.textContent,
@@ -420,7 +420,7 @@
 			);
 		},
 		parseComplexData: function(output){
-			var cdata = output.querySelector(":scope>Data>ComplexData");
+			var cdata = output.findNode("wps:Data/wps:ComplexData");
 			return new ComplexData(
 				this.parseFormat(cdata),
 	            this.getNodeContentAsString(cdata)
@@ -435,11 +435,11 @@
 			return Streaming.Util.xml2string(content);
 		},
 		parseBoundingBoxData: function(output) {
-			var bbox = output.querySelector(":scope>Data>BoundingBoxData");
+			var bbox = output.findNode("wps:Data/wps:BoundingBoxData");
 			var dim = bbox.getAttribute("dimensions");
 			var crs = bbox.getAttribute("crs");
-			var lc = this.string2NumberArray(bbox.querySelector(":scope>LowerCorner").textContent);;
-			var uc = this.string2NumberArray(bbox.querySelector(":scope>UpperCorner").textContent);;
+			var lc = this.string2NumberArray(bbox.findNode("ows:LowerCorner").textContent);;
+			var uc = this.string2NumberArray(bbox.findNode("ows:UpperCorner").textContent);;
 			return Streaming.Data.BoundingBox(lc,uc,crs,dim);
 		},
 		string2NumberArray: function(string) {
@@ -451,25 +451,25 @@
 			return result;
 		},
 		parseReferenceData: function(output) {
-			var ref = output.querySelector(":scope>Reference");
+			var ref = output.findNode("ows:Reference");
 			var options = {
 				href: ref.getAttributeNS(Streaming.XML.NS_XLINK, "href"),
 				format: this.parseFormat(ref),
 				method: ref.getAttribute("method"),
 				headers: {}
 			};
-			var body = ref.querySelector(":scope>Body");
+			var body = ref.findNode("wps:Body");
 			if (body) {
 				options.body = this.getNodeContentAsString(body);
 			}
-			var bodyReference = ref.querySelector(":scope>RodyReference");
+			var bodyReference = ref.findNode("wps:RodyReference");
 			if (bodyReference) {
 				options.bodyReference = bodyReference.getAttributeNS(Streaming.XML.NS_XLINK, "href")
 			}
-			var headers = ref.querySelectorAll(":scope>Header");
+			var headers = ref.findNodes("wps:Header");
 			for (var i = 0; i < headers.length; ++i) {
-				options.headers[headers[i].querySelector(":scope>Key").textContent]
-						= headers[i].querySelector(":scope>Value").textContent;
+				options.headers[headers[i].findNode("wps:Key").textContent]
+						= headers[i].findNode("wps:Value").textContent;
 			}
 			return new Streaming.Data.Reference(options);
 		},
@@ -484,7 +484,7 @@
 			return new Streaming.OwsCodeType(id.getAttribute("codeSpace"), id.textContent);
 		},
 		parseProcessId: function() {
-			return this.parseIdentifier(this.xml.querySelector("ExecuteResponse>Process>Identifier"));
+			return this.parseIdentifier(this.xml.findNode("/wps:ExecuteResponse/wps:Process/ows:Identifier"));
 		},
 		parseExecuteResponse: function() {
 			return new Streaming.WPS.ExecuteResponse({
@@ -494,10 +494,10 @@
 		},
 		parseOutputMessage: function(options) {
 			var i, id,
-				elements = this.xml.querySelectorAll("Envelope>Body>OutputMessage>Outputs>Output");
+				elements = this.xml.findNodes("/soap:Envelope/soap:Body/stream:OutputMessage/stream:Outputs/stream:Output");
 			options.outputs = {}
 			for (i = 0; i < elements.length; ++i) {
-				id = this.parseIdentifier(elements[i].querySelector(":scope>Identifier"));
+				id = this.parseIdentifier(elements[i].findNode("ows:Identifier"));
 				options.outputs[id] = this.parseOutput(elements[i]);
 			}
 			return new Streaming.Message.Output(options);
@@ -506,15 +506,35 @@
 			return new Streaming.Message.Stop(options);
 		},
 		parseErrorMessage: function(options) {
-			//TODO parse
-			throw this.xml;
+			var exceptions = this.xml.findNodes("/soap:Envelope/soap:Body/stream:ErrorMessage/ows:Exception")
+			options.exceptions = this.parseExceptions(exceptions);
+			return new Streaming.Message.Error(options);
+		},
+		parseExceptions: function(exceptions) {
+			var i, result = new Array(exceptions.length);
+			for (i = 0; i < exceptions.length; ++i) {
+				result[i] = new Streaming.WPS.Exception(
+					exceptions[i].getAttribute("exceptionCode"),
+					exceptions[i].getAttribute("locator"),
+					this.parseExceptionMessages(exceptions[i])
+				);
+			}
+			return result;
+		},
+		parseExceptionMessages: function(exception) {
+			var messages = exception.findNodes("ows:ExceptionText/text()");
+			var result = new Array(messages.length);
+			for (var i = 0; i < messages.length; ++i) {
+				result[i] = messages[i].textContent;
+			}
+			return result;
 		},
 		parseExceptionReport: function() {
 			//TODO parse
-			throw this.xml;
+			return this.xml;
 		},
 		parseRelatedMessages: function() {
-			var relatesTo = this.xml.querySelectorAll("Envelope>Header>RelatesTo");
+			var relatesTo = this.xml.findNodes("/soap:Envelope/soap:Header/wsa:RelatesTo");
 			var relatedMessages = [];
 			for (var i = 0; i < relatesTo.length; ++i) {
 				if (relatesTo[i].getAttribute("RelationshipType")) {
@@ -529,10 +549,10 @@
 			return relatedMessages;
 		},
 		parseMessageID: function() {
-			return this.xml.querySelector("Envelope>Header>MessageID").textContent;
+			return this.xml.findNode("/soap:Envelope/soap:Header/wsa:MessageID").textContent;
 		},
 		parseProcessID: function() {
-			return this.xml.querySelector("Envelope>Body>*>ProcessID").textContent;
+			return this.xml.findNode("/soap:Envelope/soap:Body/*/stream:ProcessID").textContent;
 		},
 		parseMessage: function() {
 			var options = {
@@ -540,7 +560,7 @@
 				messageId: this.parseMessageID(),
 				relatedMessage: this.parseRelatedMessages()
 			};
-			var root = this.xml.querySelector("Envelope>Body>*");
+			var root = this.xml.findNode("/soap:Envelope/soap:Body/*");
 			if (QNames.Stream.OutputMessage.is(root)) {
 				return this.parseOutputMessage(options);
 			} else if (QNames.Stream.ErrorMessage.is(root)) {
@@ -556,7 +576,7 @@
 			if (QNames.WPS.ExecuteResponse.is(root)) {
 				return this.parseExecuteResponse();
 			} else if (QNames.OWS.ExceptionReport.is(root)) {
-				return this.parseExceptionReport();
+				throw this.parseExceptionReport();
 			} else if (QNames.SOAP.Envelope.is(root)) {
 				return this.parseMessage();
 			} else {
