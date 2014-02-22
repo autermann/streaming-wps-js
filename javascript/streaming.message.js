@@ -21,6 +21,7 @@
 		xmlBuilder: null,
 		relatedMessages: null,
 		init: function(options) {
+			options = options || {};
 			this.action = options.action;
 			this.messageId = options.messageId || "uuid:" + Streaming.Util.uuid();
 			this.processId = options.processId;
@@ -32,6 +33,9 @@
 		},
 		getProcessID: function() {
 			return this.processId;
+		},
+		setProcessID: function(processId) {
+			this.processId = processId;
 		},
 		getAction: function() {
 			return this.action;
@@ -46,6 +50,7 @@
 
 	Streaming.Message.Input = Streaming.Message.extend({
 		init: function(options) {
+			options = options || {};
 			options.action = "https://github.com/autermann/streaming-wps/input";
 			this._super(options);
 			this.inputs = options.inputs;
@@ -60,6 +65,7 @@
 
 	Streaming.Message.OutputRequest = Streaming.Message.extend({
 		init: function(options) {
+			options = options || {};
 			options.action = "https://github.com/autermann/streaming-wps/request-output";
 			this._super(options);
 		},
@@ -70,16 +76,22 @@
 
 	Streaming.Message.Error = Streaming.Message.extend({
 		init: function(options) {
+			options = options || {};
 			options.action = "https://github.com/autermann/streaming-wps/error";
 			this._super(options);
+			this.exceptions = options.exceptions;
 		},
 		toXML: function() {
 			return this.xmlBuilder.encodeErrorMessage(this);
+		},
+		getExceptions: function() {
+			return this.exceptions;
 		}
 	});
 
 	Streaming.Message.Output = Streaming.Message.extend({
 		init: function(options) {
+			options = options || {};
 			options.action = "https://github.com/autermann/streaming-wps/output";
 			this._super(options);
 			this.outputs = options.outputs;
@@ -91,6 +103,7 @@
 
 	Streaming.Message.Stop = Streaming.Message.extend({
 		init: function(options) {
+			options = options || {};
 			options.action = "https://github.com/autermann/streaming-wps/stop";
 			this._super(options);
 		},
