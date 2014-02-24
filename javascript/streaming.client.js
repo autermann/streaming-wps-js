@@ -97,6 +97,9 @@
 				} else {
 					self.fire("error", "Can not decode message!");
 				}
+				if (self.expected > 0 && (++self.responsecount) == self.expected) {
+					self.stop();
+				}
 			};
 			return this;
 		},
@@ -105,6 +108,11 @@
 		},
 		stop: function() {
 			return this.send(new Streaming.Message.Stop());
+		},
+		stopAfter: function(responses) {
+			this.expected = responses;
+			this.responsecount = 0;
+			return this;
 		},
 		_doOnOpen: function(fun) {
 			var self = this;
