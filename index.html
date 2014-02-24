@@ -2,10 +2,16 @@
 <html>
 <head>
 	<meta charset="utf-8">
+	<title>Streaming Fibonacci</title>
+	<link rel="stylesheet" href="css/prettify.css" type="text/css" />
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
-
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 	<script type='text/javascript' src="javascript/queryselector-scope.js"></script>
 	<script type='text/javascript' src="javascript/vkbeautify.js"></script>
+	<script type='text/javascript' src="javascript/prettify.js"></script>
+	<script type='text/javascript' src="javascript/moment-2.5.1.min.js"></script>
 
 	<script type='text/javascript' src="javascript/class.js"></script>
 	<script type='text/javascript' src="javascript/class.events.js"></script>
@@ -17,72 +23,65 @@
 	<script type='text/javascript' src="javascript/streaming.util.js"></script>
 	<script type='text/javascript' src="javascript/streaming.wps.js"></script>
 	<script type='text/javascript' src="javascript/streaming.client.js"></script>
+	<script type='text/javascript' src="javascript/streaming.test.fibonacci.js"></script>
+	<script type='text/javascript' src="javascript/streaming.test.messageappender.js"></script>
 
 	<script type="text/javascript">
-		(function(){
-			var options = {
-				streamingWPS: "http://localhost:12121/WebProcessingService",
-				streamingId: "com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm",
-				remoteWPS: "http://localhost:12121/WebProcessingService",
-				remoteId: "com.github.autermann.wps.streaming.TestAlgorithm"
-			};
+		$(document).ready(function() {
+			$("#index").change(function() {
+				var val = parseInt($(this).val());
+				if (val < 3) {
+					$(this).parent().removeClass("has-success").addClass("has-error");
+					$("#calc").prop("disabled", true);
+				} else {
+					$(this).parent().removeClass("has-error").addClass("has-success");
+					$("#calc").prop("disabled", false);
+				}
+			}).trigger("change");
 
-			Streaming.Client.start(options, function(processInfo) {
-				var client, count = 0, expected = 10;
-				console.debug("Started process: ", processInfo);
-				function onMessage(message) {
-					if ((++count) >= expected) {
-						client.stop();
-						client.close();
-					}
-				}
-				client = new Streaming.Client(processInfo)
-					.on("open", function() {
-						console.debug("Client opened");
-					})
-					.on("close", function() {
-					 	console.debug("Client closed");
-					})
-					.on("error", function(cause) {
-						console.debug("Client failed", cause);
-					})
-					.on("outputmessage", function(message) {
-						console.debug("Received Output");
-						onMessage(message);
-					})
-					.on("errormessage", function(message) {
-						console.debug("Received Error", message);
-						onMessage(message);
-					})
-					.on("stopmessage", function(message) {
-						console.debug("Received Stop message", message);
-						onMessage(message);
-					})
-					.listen();
-
-				function createInputMessage(a, b, dependencies) {
-					dependencies = dependencies || [];
-					return new Streaming.Message.Input({
-						relatedMessages: dependencies,
-						inputs: [
-							new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:int", a)),
-							new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", b))
-						]
-					});
-				}
-
-				var i, messages = [];
-				for (i = 0; i < expected; ++i) {
-					messages.push(createInputMessage(1, 1));
-				}
-				for (i = 0; i < messages.length; ++i) {
-					client.send(messages[i]);
-				}
+			$("#calc").click(function(){
+				var idx = parseInt($("#index").val());
+				new Fibonacci(idx, new MessageAppender("#incoming>.messages", "#outgoing>.messages")).start();
 			});
-		})();
+		});
 	</script>
+	<style type="text/css">
+	pre { font-size: 10px !important; }
+	body { padding-top: 20px; }
+	.panel-title {font-size: 14px; }
+	pre.panel-body {
+		border: none;
+		background-color: #f7f7f9;
+		padding-left: 15px;
+		margin-bottom: 0px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+	}
+	</style>
 </head>
 <body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-xs-2">
+				<div class="input-group">
+					<input id="index" type="text" class="form-control" value="7"/>
+					<span class="input-group-btn">
+						<button id="calc" class="btn btn-default" type="button">Calculate!</button>
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div id="outgoing" class="col-xs-6">
+				<h3>Outgoing Messages</h2>
+				<div class="messages"></div>
+			</div>
+			<div id="incoming" class="col-xs-6">
+				<h3>Incoming Messages</h2>
+				<div class="messages"></div>
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>
