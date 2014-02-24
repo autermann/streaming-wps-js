@@ -28,20 +28,32 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$("#index").change(function() {
-				var val = parseInt($(this).val());
+			var $calc = $("#calc");
+			var $idx = $("#index");
+
+			function getIdx() {
+				return parseInt($idx.val());
+			}
+
+			$idx.change(function() {
+				var val = getIdx();
 				if (val < 3) {
-					$(this).parent().removeClass("has-success").addClass("has-error");
-					$("#calc").prop("disabled", true);
+					$idx.parent()
+						.removeClass("has-success")
+						.addClass("has-error");
+					$calc.prop("disabled", true);
 				} else {
-					$(this).parent().removeClass("has-error").addClass("has-success");
-					$("#calc").prop("disabled", false);
+					$idx.parent()
+						.removeClass("has-error")
+						.addClass("has-success");
+					$calc.prop("disabled", false);
 				}
 			}).trigger("change");
 
-			$("#calc").click(function(){
-				var idx = parseInt($("#index").val());
-				new Fibonacci(idx, new MessageAppender("#incoming>.messages", "#outgoing>.messages")).start();
+			$calc.click(function(){
+				var app = new MessageAppender("#incoming", "#outgoing");
+				var fib = new Fibonacci(getIdx(), app)
+				fib.start();
 			});
 		});
 	</script>
@@ -52,16 +64,15 @@
 	pre.panel-body {
 		border: none;
 		background-color: #f7f7f9;
-		padding-left: 15px;
+		padding-left: 15px 0px, 15px, 0px;
 		margin-bottom: 0px;
-		padding-top: 0px;
-		padding-bottom: 0px;
 	}
 	</style>
 </head>
 <body>
 	<div class="container-fluid">
 		<div class="row">
+		<div class="col-xs-10"></div>
 			<div class="col-xs-2">
 				<div class="input-group">
 					<input id="index" type="text" class="form-control" value="7"/>
@@ -72,13 +83,13 @@
 			</div>
 		</div>
 		<div class="row">
-			<div id="outgoing" class="col-xs-6">
+			<div class="col-lg-6">
 				<h3>Outgoing Messages</h2>
-				<div class="messages"></div>
+				<div id="outgoing"></div>
 			</div>
-			<div id="incoming" class="col-xs-6">
+			<div class="col-lg-6">
 				<h3>Incoming Messages</h2>
-				<div class="messages"></div>
+				<div id="incoming"></div>
 			</div>
 		</div>
 	</div>
