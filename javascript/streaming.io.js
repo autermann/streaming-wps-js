@@ -558,7 +558,7 @@
 			var options = {
 				processId: this.parseProcessID(),
 				messageId: this.parseMessageID(),
-				relatedMessage: this.parseRelatedMessages()
+				relatedMessages: this.parseRelatedMessages()
 			};
 			var root = this.xml.findNode("/soap:Envelope/soap:Body/*");
 			if (QNames.Stream.OutputMessage.is(root)) {
