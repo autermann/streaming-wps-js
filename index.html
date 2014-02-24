@@ -50,9 +50,9 @@
 				}
 			}).trigger("change");
 
-			$calc.click(function(){
+			$calc.click(function() {
 				var app = new MessageAppender("#incoming", "#outgoing");
-				var fib = new Fibonacci(getIdx(), app)
+				var fib = new Fibonacci(getIdx(), app);
 				fib.start();
 			});
 		});

@@ -43,7 +43,7 @@ window.Fibonacci = Class.extend({
 				message: processInfo.executeResponse,
 				xml: processInfo.executeResponseXML
 			});
-			self.send(new Streaming.Client(processInfo)
+			self.client = new Streaming.Client(processInfo)
 				.on("error", function(cause) {
 					console.debug("Client failed", cause);
 				})
@@ -52,16 +52,16 @@ window.Fibonacci = Class.extend({
 				})
 				.on("outgoing-message", function(e) {
 					self.appender.outgoing(e);
-				})
-			);
+				});
+			self.send();
 		});
 	},
-	send: function(client) {
-		client.listen().stopAfter(this.idx-1);
+	send: function() {
+		this.client.listen().stopAfter(this.idx-1);
 		for (var i = this.idx; i > 3; i--) {
-			client.send(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
+			this.client.send(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
 		}
-		client.send(this.createMessage(3, this.litA(1), this.refB(2)));
-		client.send(this.createMessage(2, this.litA(1), this.litB(1)));
+		this.client.send(this.createMessage(3, this.litA(1), this.refB(2)));
+		this.client.send(this.createMessage(2, this.litA(1), this.litB(1)));
 	}
 });

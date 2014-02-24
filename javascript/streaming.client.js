@@ -155,8 +155,7 @@
 		];
 		var outputs = [
 			new Streaming.WPS.OutputDefinition({id: "process-id"}),
-			new Streaming.WPS.OutputDefinition({id: "input-socket-uri"}),
-			new Streaming.WPS.OutputDefinition({id: "output-socket-uri"}),
+			new Streaming.WPS.OutputDefinition({id: "socket-uri"}),
 		];
 
 		if (options.commonInputs) {
@@ -181,7 +180,7 @@
 			var response = parser.parse(e);
 			processInfo = {
 				processId: response.getOutputs()["process-id"].getValue(),
-				socketURI: response.getOutputs()["input-socket-uri"].getValue(),
+				socketURI: response.getOutputs()["socket-uri"].getValue(),
 				executeRequest: request,
 				executeRequestXML: requestxml,
 				executeResponse: response,
