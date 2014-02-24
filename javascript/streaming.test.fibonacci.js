@@ -31,15 +31,6 @@ window.Fibonacci = Class.extend({
 			inputs: [ a, b ]
 		});
 	},
-	createMessages: function() {
-		var messages = [];
-		for (var i = this.idx; i > 3; i--) {
-			messages.push(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
-		}
-		messages.push(this.createMessage(3, this.litA(1), this.refB(2)));
-		messages.push(this.createMessage(2, this.litA(1), this.litB(1)));
-		return messages;
-	},
 	start: function() {
 		var self = this;
 		self.appender.reset();
@@ -52,7 +43,7 @@ window.Fibonacci = Class.extend({
 				message: processInfo.executeResponse,
 				xml: processInfo.executeResponseXML
 			});
-			var client = new Streaming.Client(processInfo)
+			self.send(new Streaming.Client(processInfo)
 				.on("error", function(cause) {
 					console.debug("Client failed", cause);
 				})
@@ -62,13 +53,15 @@ window.Fibonacci = Class.extend({
 				.on("outgoing-message", function(e) {
 					self.appender.outgoing(e);
 				})
-				.listen();
-
-			var i, messages = self.createMessages();
-			client.stopAfter(messages.length);
-			for (i = 0; i < messages.length; ++i) {
-				client.send(messages[i]);
-			}
+			);
 		});
+	},
+	send: function(client) {
+		client.listen().stopAfter(this.idx-1);
+		for (var i = this.idx; i > 3; i--) {
+			client.send(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
+		}
+		client.send(this.createMessage(3, this.litA(1), this.refB(2)));
+		client.send(this.createMessage(2, this.litA(1), this.litB(1)));
 	}
 });
