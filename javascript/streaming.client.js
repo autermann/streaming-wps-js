@@ -75,23 +75,24 @@
 			};
 			this.socket.onmessage = function(e) {
 				var xml = Streaming.Util.string2xml(e.data);
-				console.debug("Received Message", xml);
 				var parser = new Streaming.XML.Parser();
 				var message = parser.parse(xml);
 				if (message instanceof Streaming.Message) {
+					self.fire("incoming-message", {xml: xml, message: message});
 					self.messages[message.getID()] = message;
 					if (message instanceof Streaming.Message.Input) {
-						self.fire("inputmessage", message);
+						self.fire("input-message", message);
 					} else if (message instanceof Streaming.Message.Output) {
-						self.fire("outputmessage", message);
+						self.fire("output-message", message);
 					} else if (message instanceof Streaming.Message.Error) {
-						self.fire("errormessage", message);
+						self.fire("error-message", message);
 					} else if (message instanceof Streaming.Message.OutputRequest) {
-						self.fire("outputrequestmessage", message);
+						self.fire("output-request-message", message);
 					} else if (message instanceof Streaming.Message.Stop) {
-						self.fire("stopmessage", message);
+						self.fire("stop-message", message);
+						self.close();
 					} else {
-						self.fire("error", message);
+						self.fire("error", e);
 					}
 				} else {
 					self.fire("error", "Can not decode message!");
@@ -123,9 +124,9 @@
 				message.setProcessID(this.processId);
 				this.messages[message.getID()] = message;
 				var xml = message.toXML();
-				console.debug("Sending Message", xml);
 				this.socket.send(Streaming.Util.xml2string(xml));
-			})
+				this.fire("outgoing-message", {message:message,xml:xml});
+			});
 			return this;
 		},
 		close: function() {
@@ -160,7 +161,6 @@
 			outputs: new Streaming.WPS.ResponseDocument({definitons: outputs})
 		});
 		var requestxml = request.toXML();
-		console.debug("WPS Request:", requestxml);
 		var self = this;
 		$.ajax(options.streamingWPS, {
 			type: "POST",
@@ -169,12 +169,15 @@
 			mimeType: "application/xml",
 			data: Streaming.Util.xml2string(requestxml)
 		}).done(function(e) {
-			console.debug("WPS Response:", e);
 			var parser = new Streaming.XML.Parser();
 			var response = parser.parse(e);
 			processInfo = {
 				processId: response.getOutputs()["process-id"].getValue(),
-				socketURI: response.getOutputs()["input-socket-uri"].getValue()
+				socketURI: response.getOutputs()["input-socket-uri"].getValue(),
+				executeRequest: request,
+				executeRequestXML: requestxml,
+				executeResponse: response,
+				executeResponseXML: e
 			};
 			callback(processInfo);
 		});
