@@ -6,15 +6,15 @@ window.Fibonacci = Class.extend({
 		remoteId: "com.github.autermann.wps.streaming.TestAlgorithm"
 	},
 	init: function(idx, appender) {
-		if (idx < 3) throw new Error("Boring!");
+		if (idx < 2) throw new Error("Boring!");
 		this.idx = idx;
 		this.appender = appender;
 	},
 	litA: function(i) {
-		return new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:int", i));
+		return new Streaming.Input.Data("a", new Streaming.Data.Literal("xs:long", i));
 	},
 	litB: function(i) {
-		return new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:int", i));
+		return new Streaming.Input.Data("b", new Streaming.Data.Literal("xs:long", i));
 	},
 	refA: function(i) {
 		return new Streaming.Input.Reference("a", this.idAt(i), "result");
@@ -58,10 +58,11 @@ window.Fibonacci = Class.extend({
 	},
 	send: function() {
 		this.client.listen().stopAfter(this.idx-1);
-		for (var i = this.idx; i > 3; i--) {
+		for (var i = this.idx; i > 1; i--) {
 			this.client.send(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
 		}
-		this.client.send(this.createMessage(3, this.litA(1), this.refB(2)));
-		this.client.send(this.createMessage(2, this.litA(1), this.litB(1)));
+
+		this.client.send(this.createMessage(1, this.litA(0), this.litB(1)));
+		this.client.send(this.createMessage(0, this.litA(0), this.litB(0)));
 	}
 });
