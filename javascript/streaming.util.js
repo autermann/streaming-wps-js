@@ -56,6 +56,15 @@
 			return vkbeautify.xml(fun(xml));
 		}
 	})();
+	Streaming.Util.randomize = function(a) {
+		var i = a.length, swap = function(a, i, j) {
+			var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+		};
+		while (i !== 0) {
+			swap(array, i, Math.floor(Math.random() * i--));
+		}
+		return a;
+	}
 	Document.XPATH_NAMESPACES = Document.XPATH_NAMESPACES || {};
 	var nameresolver = function(prefix) {
 		return Document.XPATH_NAMESPACES[prefix];

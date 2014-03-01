@@ -56,13 +56,26 @@ window.Fibonacci = Class.extend({
 			self.send();
 		});
 	},
-	send: function() {
-		this.client.listen().stopAfter(this.idx-1);
-		for (var i = this.idx; i > 1; i--) {
-			this.client.send(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
+	_createMessages: function() {
+		var i, messages = new Array(this.idx);
+		for (i = this.idx; i > 1; i--) {
+			messages.push(this.createMessage(i, this.refA(i-2), this.refB(i-1)));
 		}
-
-		this.client.send(this.createMessage(1, this.litA(0), this.litB(1)));
-		this.client.send(this.createMessage(0, this.litA(0), this.litB(0)));
+		messages.push(this.createMessage(1, this.litA(0), this.litB(1)));
+		messages.push(this.createMessage(0, this.litA(0), this.litB(0)));
+		return Streaming.Util.randomize(messages);
+	},
+	send: function() {
+		var self = this, i = 0, interval = 500, len = self.idx,
+			timer, messages = self._createMessages();
+		this.client.listen().stopAfter(len-1);
+		timer = function () {
+			if (i < len) {
+				self.client.send(messages[i]);
+				window.setTimeout(timer, interval);
+			}
+			i++;
+		};
+		timer();
 	}
 });
