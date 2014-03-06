@@ -3,7 +3,7 @@ window.Fibonacci = Class.extend({
 		streamingWPS: "http://localhost:12121/WebProcessingService",
 		streamingId: "com.github.autermann.wps.streaming.delegate.DelegatingStreamingAlgorithm",
 		remoteWPS: "http://localhost:12121/WebProcessingService",
-		remoteId: "com.github.autermann.wps.streaming.TestAlgorithm"
+		remoteId: "com.github.autermann.wps.streaming.example.AddAlgorithm"
 	},
 	init: function(idx, appender) {
 		if (idx < 2) throw new Error("Boring!");
