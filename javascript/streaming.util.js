@@ -57,11 +57,11 @@
 		}
 	})();
 	Streaming.Util.randomize = function(a) {
-		var i = a.length, swap = function(a, i, j) {
+		var i = a.length-1, swap = function(i, j) {
 			var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
 		};
 		while (i !== 0) {
-			swap(array, i, Math.floor(Math.random() * i--));
+			swap(i, Math.floor(Math.random() * i--));
 		}
 		return a;
 	}
