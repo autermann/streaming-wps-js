@@ -178,15 +178,19 @@
 		}).done(function(e) {
 			var parser = new Streaming.XML.Parser();
 			var response = parser.parse(e);
-			processInfo = {
-				processId: response.getOutputs()["process-id"].getValue(),
-				socketURI: response.getOutputs()["socket-uri"].getValue(),
-				executeRequest: request,
-				executeRequestXML: requestxml,
-				executeResponse: response,
-				executeResponseXML: e
-			};
-			callback(processInfo);
+			if (response instanceof Streaming.WPS.ExecuteResponse) {
+				processInfo = {
+					processId: response.getOutputs()["process-id"].getValue(),
+					socketURI: response.getOutputs()["socket-uri"].getValue(),
+					executeRequest: request,
+					executeRequestXML: requestxml,
+					executeResponse: response,
+					executeResponseXML: e
+				};
+				callback(processInfo);
+			} else {
+				callback(null, response)
+			}
 		});
 	};
 })(window.Streaming||(window.Streaming = {}));

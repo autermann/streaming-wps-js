@@ -576,7 +576,7 @@
 			if (QNames.WPS.ExecuteResponse.is(root)) {
 				return this.parseExecuteResponse();
 			} else if (QNames.OWS.ExceptionReport.is(root)) {
-				throw this.parseExceptionReport();
+				return this.parseExceptionReport();
 			} else if (QNames.SOAP.Envelope.is(root)) {
 				return this.parseMessage();
 			} else {

@@ -34,7 +34,11 @@ window.Fibonacci = Class.extend({
 	start: function() {
 		var self = this;
 		self.appender.reset();
-		Streaming.Client.start(self.options, function(processInfo) {
+		Streaming.Client.start(self.options, function(processInfo, error) {
+			if (error) {
+				self.appender.incoming({message:error, xml: error});
+				return;
+			}
 			self.appender.outgoing({
 				message: processInfo.executeRequest,
 				xml: processInfo.executeRequestXML
