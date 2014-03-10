@@ -88,6 +88,8 @@
 						self.fire("error-message", message);
 					} else if (message instanceof Streaming.Message.OutputRequest) {
 						self.fire("output-request-message", message);
+					} else if (message instanceof Streaming.Message.Description) {
+						self.fire("description-message", message);
 					} else if (message instanceof Streaming.Message.Stop) {
 						self.fire("stop-message", message);
 						self.close();
@@ -105,6 +107,9 @@
 		},
 		listen: function() {
 			return this.send(new Streaming.Message.OutputRequest());
+		},
+		describe: function() {
+			return this.send(new Streaming.Message.Describe());
 		},
 		stop: function() {
 			return this.send(new Streaming.Message.Stop());
@@ -178,18 +183,18 @@
 		}).done(function(e) {
 			var parser = new Streaming.XML.Parser();
 			var response = parser.parse(e);
+			processInfo = {
+				request: request,
+				requestXML: requestxml,
+				response: response,
+				responseXML: e
+			};
 			if (response instanceof Streaming.WPS.ExecuteResponse) {
-				processInfo = {
-					processId: response.getOutputs()["process-id"].getValue(),
-					socketURI: response.getOutputs()["socket-uri"].getValue(),
-					executeRequest: request,
-					executeRequestXML: requestxml,
-					executeResponse: response,
-					executeResponseXML: e
-				};
-				callback(processInfo);
+				processInfo.processId = response.getOutputs()["process-id"].getValue(),
+				processInfo.socketURI = response.getOutputs()["socket-uri"].getValue(),
+				callback(processInfo, null);
 			} else {
-				callback(null, response)
+				callback(null, processInfo)
 			}
 		});
 	};

@@ -72,6 +72,12 @@
 			} else if (e.message instanceof Streaming.WPS.ExecuteResponse) {
 				title = "WPS Execute Response";
 				type = "primary";
+			} else if (e.message instanceof Streaming.Message.Describe) {
+				title = "Describe message for <code>" + e.message.getProcessID() + "</code>";
+				type = "warning";
+			} else if (e.message instanceof Streaming.Message.Description) {
+				title = "Description message for <code>" + e.message.getProcessID() + "</code>";
+				type = "warning";
 			} else {
 				title = "Message";
 				type = "default";

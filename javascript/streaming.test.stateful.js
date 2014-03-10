@@ -73,7 +73,7 @@ window.Stateful = Class.extend({
 		var self = this, i = 0, interval = 500, len = self.messages,
 			timer, messages = self._createMessages();
 
-		self.client.listen();
+		self.client.describe().listen();
 		timer = function () {
 			if (i < len) {
 				self.client.send(messages[i]);

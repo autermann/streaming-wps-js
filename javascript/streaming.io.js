@@ -66,6 +66,7 @@
 			OutputRequestMessage : new QName(Streaming.XML.NS_STREAM, "OutputRequestMessage"),
 			StopMessage : new QName(Streaming.XML.NS_STREAM, "StopMessage"),
 			ErrorMessage : new QName(Streaming.XML.NS_STREAM, "ErrorMessage"),
+			DescriptionMessage : new QName(Streaming.XML.NS_STREAM, "DescriptionMessage"),
 		},
 		WPS: {
 			ExecuteResponse : new QName(Streaming.XML.NS_WPS, "ExecuteResponse"),
@@ -171,6 +172,14 @@
 	 		this.createEnvelope();
 	 		this.encodeHeader(message);
 	 		this.message = this.doc.createElement("stream:StopMessage");
+	 		this.message.appendChild(this.createProcessID(message.getProcessID()));
+	 		this.body.appendChild(this.message);
+	 		return this.doc;
+	 	},
+	 	encodeDescribeMessage: function(message) {
+	 		this.createEnvelope();
+	 		this.encodeHeader(message);
+	 		this.message = this.doc.createElement("stream:DescribeMessage");
 	 		this.message.appendChild(this.createProcessID(message.getProcessID()));
 	 		this.body.appendChild(this.message);
 	 		return this.doc;
@@ -554,6 +563,10 @@
 		parseProcessID: function() {
 			return this.xml.findNode("/soap:Envelope/soap:Body/*/stream:ProcessID").textContent;
 		},
+		parseDescriptionMessage: function(options) {
+			options.description = this.xml.findNode("/soap:Envelope/soap:Body/stream:DescriptionMessage/stream:StreamingProcessDescription");
+			return new Streaming.Message.Description(options);
+		},
 		parseMessage: function() {
 			var options = {
 				processId: this.parseProcessID(),
@@ -567,6 +580,8 @@
 				return this.parseErrorMessage(options);
 			} else if (QNames.Stream.StopMessage.is(root)) {
 				return this.parseStopMessage(options);
+			} else if (QNames.Stream.DescriptionMessage.is(root)) {
+				return this.parseDescriptionMessage(options);
 			} else {
 				throw new Error("Can not parse XML");
 			}

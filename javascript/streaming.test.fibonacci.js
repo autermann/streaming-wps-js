@@ -36,16 +36,23 @@ window.Fibonacci = Class.extend({
 		self.appender.reset();
 		Streaming.Client.start(self.options, function(processInfo, error) {
 			if (error) {
-				self.appender.incoming({message:error, xml: error});
+				self.appender.outgoing({
+					message: error.request,
+					xml: error.requestXML
+				});
+				self.appender.incoming({
+					message:error.response,
+					xml: error.responseXML
+				});
 				return;
 			}
 			self.appender.outgoing({
-				message: processInfo.executeRequest,
-				xml: processInfo.executeRequestXML
+				message: processInfo.request,
+				xml: processInfo.requestXML
 			});
 			self.appender.incoming({
-				message: processInfo.executeResponse,
-				xml: processInfo.executeResponseXML
+				message: processInfo.response,
+				xml: processInfo.responseXML
 			});
 			self.client = new Streaming.Client(processInfo)
 				.on("error", function(cause) {
@@ -72,7 +79,7 @@ window.Fibonacci = Class.extend({
 	send: function() {
 		var self = this, i = 0, interval = 500, len = self.idx+1,
 			timer, messages = self._createMessages();
-		this.client.listen().stopAfter(len);
+		this.client.describe().listen().stopAfter(len);
 		timer = function () {
 			if (i < len) {
 				self.client.send(messages[i]);

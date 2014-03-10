@@ -111,4 +111,28 @@
 			return this.xmlBuilder.encodeStopMessage(this);
 		}
 	});
+
+	Streaming.Message.Describe = Streaming.Message.extend({
+		init: function(options) {
+			options = options || {};
+			options.action = "https://github.com/autermann/streaming-wps/describe";
+			this._super(options);
+		},
+		toXML: function() {
+			return this.xmlBuilder.encodeDescribeMessage(this);
+		}
+	});
+
+	Streaming.Message.Description = Streaming.Message.extend({
+		init: function(options) {
+			options = options || {};
+			options.action = "https://github.com/autermann/streaming-wps/description";
+			this._super(options);
+			this.description = options.description;
+		},
+		getDescription: function() {
+			return this.description;
+		}
+	});
+
 })(window.Streaming||(window.Streaming = {}));
